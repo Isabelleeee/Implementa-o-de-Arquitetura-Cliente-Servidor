@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+    <meta charset="UTF-8">
     <title>Livraria Mackenzie</title>
 </head>
 <body>
@@ -10,7 +11,7 @@
     <script>
         async function carregarLivros() {
             // Conecta no servidor (Back-end)
-            const response = await fetch('http://localhost:8000/livros');
+            const response = await fetch('https://deploydearquiteturacliente-servidor-djfyh4axbwddh9cg.brazilsouth-01.azurewebsites.net/livros');
             const livros = await response.json();
             
             const lista = document.getElementById('lista-livros');
