@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>Livraria Mackenzie</title>
+</head>
+<body>
+    <h1>Catálogo de Livros</h1>
+    <ul id="lista-livros"></ul>
+
+    <script>
+        async function carregarLivros() {
+            // Conecta no servidor (Back-end)
+            const response = await fetch('http://localhost:8000/livros');
+            const livros = await response.json();
+            
+            const lista = document.getElementById('lista-livros');
+            livros.forEach(livro => {
+                const li = document.createElement('li');
+                li.textContent = `${livro.titulo} - ${livro.autor} (R$ ${livro.preco})`;
+                lista.appendChild(li);
+            });
+        }
+        carregarLivros();
+    </script>
+</body>
+</html>
