@@ -48,6 +48,14 @@ O servidor estará ativo e pronto para receber requisições em: `http://127.0.0
 ### 4. Acessando a Aplicação
 Abra o arquivo `frontend/index.html` em seu navegador de preferência. A página realizará o consumo automático dos dados do servidor local e exibirá o catálogo.
 
+### 5. Testes do Back-end
+Para validar o funcionamento da API de forma independente do front-end, foi desenvolvida uma função de teste automatizada em Python.
+
+**Como rodar o teste:**
+1. Instale a biblioteca requests: `pip install requests`
+2. Execute o script: `python backend/test_api.py`
+3. O script validará os endpoints de listagem (GET) e inserção (POST) diretamente no Azure.
+
 ---
 
 ## 🛠️ Tecnologias Utilizadas
