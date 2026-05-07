@@ -2,25 +2,96 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Livraria Mackenzie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livraria Mackenzie - Admin</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        h1 { color: #b11116; border-bottom: 2px solid #eee; }
+        .form-group { margin-bottom: 15px; border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9; }
+        input { display: block; width: 95%; margin: 10px 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #b11116; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #8e0e12; }
+        ul { list-style: none; padding: 0; }
+        li { background: #fff; border: 1px solid #eee; margin-bottom: 10px; padding: 10px; border-radius: 4px; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); }
+    </style>
 </head>
 <body>
-    <h1>Catálogo de Livros</h1>
-    <ul id="lista-livros"></ul>
+    <h1>Catálogo de Livros Mackenzie</h1>
+
+    <!-- Formulário para Adicionar Livro (A parte "funcional") -->
+    <div class="form-group">
+        <h3>Adicionar Novo Livro</h3>
+        <input type="number" id="id" placeholder="ID do Livro">
+        <input type="text" id="titulo" placeholder="Título do Livro">
+        <input type="text" id="autor" placeholder="Autor">
+        <input type="number" step="0.01" id="preco" placeholder="Preço (Ex: 35.50)">
+        <button onclick="adicionarLivro()">Cadastrar Livro</button>
+    </div>
+
+    <h2>Livros Disponíveis</h2>
+    <ul id="lista-livros">
+        <!-- Os livros vão aparecer aqui -->
+    </ul>
 
     <script>
+        const API_URL = 'https://deploydearquiteturacliente-servidor-djfyh4axbwddh9cg.brazilsouth-01.azurewebsites.net/livros';
+
+        // Função para Listar (GET)
         async function carregarLivros() {
-            // Conecta no servidor (Back-end)
-            const response = await fetch('https://deploydearquiteturacliente-servidor-djfyh4axbwddh9cg.brazilsouth-01.azurewebsites.net/livros');
-            const livros = await response.json();
-            
             const lista = document.getElementById('lista-livros');
-            livros.forEach(livro => {
-                const li = document.createElement('li');
-                li.textContent = `${livro.titulo} - ${livro.autor} (R$ ${livro.preco})`;
-                lista.appendChild(li);
-            });
+            lista.innerHTML = "<li>Carregando...</li>";
+            
+            try {
+                const response = await fetch(API_URL);
+                const livros = await response.json();
+                
+                lista.innerHTML = ""; // Limpa a lista
+                livros.forEach(livro => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${livro.titulo}</strong><br>Autor: ${livro.autor} | <span>R$ ${livro.preco.toFixed(2)}</span>`;
+                    lista.appendChild(li);
+                });
+            } catch (error) {
+                lista.innerHTML = "<li style='color:red'>Erro ao conectar com o servidor.</li>";
+            }
         }
+
+        // Função para Cadastrar (POST)
+        async function adicionarLivro() {
+            const novoLivro = {
+                id: parseInt(document.getElementById('id').value),
+                titulo: document.getElementById('titulo').value,
+                autor: document.getElementById('autor').value,
+                preco: parseFloat(document.getElementById('preco').value)
+            };
+
+            if (!novoLivro.titulo || !novoLivro.autor) {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(novoLivro)
+                });
+
+                if (response.ok) {
+                    alert("Livro cadastrado com sucesso!");
+                    carregarLivros(); // Recarrega a lista automaticamente
+                    // Limpa os campos
+                    document.getElementById('id').value = '';
+                    document.getElementById('titulo').value = '';
+                    document.getElementById('autor').value = '';
+                    document.getElementById('preco').value = '';
+                }
+            } catch (error) {
+                alert("Erro ao enviar dados para o servidor.");
+            }
+        }
+
+        // Inicializa a lista ao abrir a página
         carregarLivros();
     </script>
 </body>
