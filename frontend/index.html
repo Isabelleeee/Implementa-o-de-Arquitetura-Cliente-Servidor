@@ -3,128 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livraria Mackenzie - Checkout</title>
+    <title>Livraria Mackenzie - Produto</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 900px; margin: 20px auto; display: grid; grid-template-columns: 1fr 300px; gap: 20px; padding: 20px; }
-        header { grid-column: 1 / span 2; border-bottom: 3px solid #b11116; padding-bottom: 10px; }
-        h1 { color: #b11116; margin: 0; }
-        .busca-container { margin: 20px 0; grid-column: 1 / span 2; }
-        input { padding: 10px; width: 100%; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; background: #f3f3f3; }
+        header { background: #232f3e; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .container { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
         
-        /* Lista de Livros */
-        .catalogo { display: grid; gap: 15px; }
-        .livro-card { border: 1px solid #eee; padding: 15px; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .btn-add { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
-        
+        /* Busca */
+        .busca-bar { margin-bottom: 20px; }
+        input { padding: 12px; width: 100%; border-radius: 4px; border: 1px solid #ccc; }
+
+        /* Grid de Livros */
+        .catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .livro-card { background: white; padding: 15px; border-radius: 4px; cursor: pointer; transition: 0.2s; border: 1px solid #ddd; }
+        .livro-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .livro-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 4px; }
+
+        /* Modal "Página do Produto" */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; }
+        .modal-content { background: white; width: 80%; max-width: 800px; margin: 5% auto; padding: 30px; border-radius: 8px; position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .close { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; }
+        .detalhes-img { width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
         /* Carrinho */
-        .carrinho { border: 1px solid #b11116; padding: 15px; border-radius: 8px; background: #fdfdfd; height: fit-content; }
-        .item-carrinho { font-size: 0.9em; border-bottom: 1px dashed #ccc; padding: 5px 0; display: flex; justify-content: space-between; }
-        .total { font-weight: bold; margin-top: 15px; color: #b11116; font-size: 1.2em; }
+        .carrinho { background: white; padding: 15px; border-radius: 4px; border: 1px solid #ddd; height: fit-content; }
+        .btn-compra { background: #ffd814; border: 1px solid #fcd200; padding: 10px; width: 100%; border-radius: 20px; cursor: pointer; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Livraria Mackenzie - Engenharia</h1>
+    <h2 style="margin:0">Mackenzie Books</h2>
+    <div>Itens: <span id="cart-count">0</span></div>
 </header>
 
-<div class="busca-container">
-    <input type="text" id="inputBusca" placeholder="🔍 Buscar por título ou autor..." onkeyup="filtrarLivros()">
+<div class="busca-bar">
+    <input type="text" id="busca" placeholder="Pesquisar na Livraria Mackenzie..." onkeyup="filtrar()">
 </div>
 
-<main class="catalogo" id="lista-livros">
-    <!-- Livros carregam aqui -->
-</main>
+<div class="container">
+    <main class="catalogo" id="lista-livros"></main>
+    
+    <aside class="carrinho">
+        <h3>Subtotal</h3>
+        <p style="font-size: 1.5em; font-weight: bold;">R$ <span id="valor-total">0.00</span></p>
+        <button class="btn-compra" onclick="alert('Indo para o pagamento...')">Fechar pedido</button>
+    </aside>
+</div>
 
-<aside class="carrinho">
-    <h3>🛒 Meu Carrinho</h3>
-    <div id="itens-carrinho">
-        <p style="color: #999;">O carrinho está vazio.</p>
+<!-- Modal estilo Amazon -->
+<div id="produtoModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharDetalhes()">&times;</span>
+        <img id="modal-img" src="" class="detalhes-img">
+        <div>
+            <h1 id="modal-titulo" style="margin-top:0"></h1>
+            <p id="modal-autor" style="color: #565959;"></p>
+            <hr>
+            <p style="color: #B12704; font-size: 1.8em;">R$ <span id="modal-preco"></span></p>
+            <p><strong>Sobre este item:</strong><br>
+            Edição especial para estudantes de Engenharia Mackenzie. Este exemplar faz parte do acervo técnico e literário do Exercício 8.4.</p>
+            <button class="btn-compra" id="btn-add-modal">Adicionar ao carrinho</button>
+        </div>
     </div>
-    <div class="total">Total: R$ <span id="valor-total">0.00</span></div>
-    <button onclick="finalizarPedido()" style="width:100%; margin-top:10px; background:#b11116; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer;">Finalizar Compra</button>
-</aside>
+</div>
 
 <script>
     const API_URL = 'https://deploydearquiteturacliente-servidor-djfyh4axbwddh9cg.brazilsouth-01.azurewebsites.net/livros';
-    let todosOsLivros = [];
+    let livros = [];
     let carrinho = [];
 
-    // Busca os livros no seu Back-end do Azure
-    async function carregarLivros() {
-        try {
-            const response = await fetch(API_URL);
-            todosOsLivros = await response.json();
-            renderizar(todosOsLivros);
-        } catch (e) {
-            document.getElementById('lista-livros').innerHTML = "Erro ao carregar catálogo.";
-        }
+    async function carregar() {
+        const res = await fetch(API_URL);
+        livros = await res.json();
+        render(livros);
     }
 
-    function renderizar(lista) {
-        const container = document.getElementById('lista-livros');
-        container.innerHTML = "";
-        lista.forEach(l => {
-            container.innerHTML += `
-                <div class="livro-card">
-                    <div>
-                        <strong>${l.titulo}</strong><br>
-                        <small>${l.autor}</small><br>
-                        <span style="color:#b11116">R$ ${l.preco.toFixed(2)}</span>
-                    </div>
-                    <button class="btn-add" onclick="adicionarAoCarrinho(${l.id})">＋ Adicionar</button>
-                </div>`;
-        });
+    function render(data) {
+        const html = data.map(l => `
+            <div class="livro-card" onclick="abrirDetalhes(${l.id})">
+                <img src="https://via.placeholder.com/150x200?text=Livro+${l.id}">
+                <h4 style="margin:10px 0 5px">${l.titulo}</h4>
+                <p style="font-size:0.8em; color:gray">${l.autor}</p>
+                <strong style="color:#B12704">R$ ${l.preco.toFixed(2)}</strong>
+            </div>
+        `).join('');
+        document.getElementById('lista-livros').innerHTML = html;
     }
 
-    // Função de Busca (Simplificada)
-    function filtrarLivros() {
-        const termo = document.getElementById('inputBusca').value.toLowerCase();
-        const filtrados = todosOsLivros.filter(l => 
-            l.titulo.toLowerCase().includes(termo) || 
-            l.autor.toLowerCase().includes(termo)
-        );
-        renderizar(filtrados);
+    function filtrar() {
+        const termo = document.getElementById('busca').value.toLowerCase();
+        render(livros.filter(l => l.titulo.toLowerCase().includes(termo)));
     }
 
-    // Função do Carrinho
-    function adicionarAoCarrinho(id) {
-        const livro = todosOsLivros.find(l => l.id === id);
-        carrinho.push(livro);
-        atualizarCarrinho();
+    function abrirDetalhes(id) {
+        const l = livros.find(item => item.id === id);
+        document.getElementById('modal-titulo').innerText = l.titulo;
+        document.getElementById('modal-autor').innerText = "por " + l.autor;
+        document.getElementById('modal-preco').innerText = l.preco.toFixed(2);
+        document.getElementById('modal-img').src = `https://via.placeholder.com/300x400?text=${l.titulo}`;
+        
+        document.getElementById('btn-add-modal').onclick = () => {
+            carrinho.push(l);
+            atualizarCarrinho();
+            fecharDetalhes();
+        };
+
+        document.getElementById('produtoModal').style.display = "block";
+    }
+
+    function fecharDetalhes() {
+        document.getElementById('produtoModal').style.display = "none";
     }
 
     function atualizarCarrinho() {
-        const container = document.getElementById('itens-carrinho');
-        const totalSpan = document.getElementById('valor-total');
-        
-        if (carrinho.length === 0) {
-            container.innerHTML = '<p style="color: #999;">O carrinho está vazio.</p>';
-            totalSpan.innerText = "0.00";
-            return;
-        }
-
-        container.innerHTML = "";
-        let total = 0;
-        carrinho.forEach((item, index) => {
-            total += item.preco;
-            container.innerHTML += `
-                <div class="item-carrinho">
-                    <span>${item.titulo}</span>
-                    <strong>R$ ${item.preco.toFixed(2)}</strong>
-                </div>`;
-        });
-        totalSpan.innerText = total.toFixed(2);
+        const total = carrinho.reduce((acc, item) => acc + item.preco, 0);
+        document.getElementById('valor-total').innerText = total.toFixed(2);
+        document.getElementById('cart-count').innerText = carrinho.length;
     }
 
-    function finalizarPedido() {
-        if(carrinho.length === 0) return alert("Adicione livros primeiro!");
-        alert(`Pedido finalizado! Total: R$ ${document.getElementById('valor-total').innerText}\nObrigado por comprar na Livraria Mackenzie!`);
-        carrinho = [];
-        atualizarCarrinho();
-    }
-
-    carregarLivros();
+    carregar();
 </script>
 </body>
 </html>
